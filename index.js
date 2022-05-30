@@ -1,19 +1,21 @@
-const express = require('express')
-const app = express()
-const dotenv =require("dotenv");
+const cookieParser = require('cookie-parser')
+const express = require("express");
+const cors = require("cors");
+require('dotenv').config()
 const mongoose = require("mongoose");
-
-require("./config/db");
+const bcrypt = require('bcryptjs');
+const app = express();
+app.use(cookieParser())
 
 const port = process.env.PORT || 5000;
 
+require("./config/db")
+
+app.use(cors());
+const User = require("./models/user");
 app.use(express.json());
-
-//we link the router files to make our rout easy
-app.use(require('./routes/auth'))
-
-
+app.use(require("./routes/auth"));
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
