@@ -1,12 +1,11 @@
-const cookieParser = require('cookie-parser')
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const authenticate = require("../middleware/authecticate");
+const authenticate = require("../middleware/authenticate")
+
 require("../config/db");
 const User = require("../models/user");
-router.use(cookieParser())
 
 router.get("/", (req, res) => {
   res.send("Hello World!");
@@ -40,6 +39,7 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
+    let token;
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -50,21 +50,21 @@ router.post("/login", async (req, res) => {
     if (userLogin) {
       const isMatch = await bcrypt.compare(password, userLogin.password);
 
-    const token = await userLogin.generateAuthToken();
+      token = await userLogin.generateAuthToken();
       console.log(token);
 
-      res.cookie("jwtoken", token,{
-        expires:new Date(Date.now()+ 25892000000),
-        httpOnly: true
+      res.cookie("access_token", token, {
+        expires: new Date(Date.now() + 25892000000),
+        httpOnly: true,
       });
 
       if (!isMatch) {
-        return res.status(400).json({ message: "user error" });
+        return res.status(400).json({ error: "user error" });
       } else {
-        return res.json({ message: "successfully" });
+        res.json({ message: "successfully" });
       }
     } else {
-      res.status(400).json({ error: "user error" });
+      return res.status(400).json({ error: "user error" });
     }
   } catch (error) {
     console.log(error);
@@ -74,6 +74,13 @@ router.post("/login", async (req, res) => {
 router.get("/about",authenticate, (req, res) => {
   console.log("about");
   res.send(req.rootUser);
+});
+
+router.get("/logout", (req, res) => {
+  return res
+    .clearCookie("access_token", {path: "/"})
+    .status(200)
+    .json({ message: "Successfully logged out 😏 🍀" });
 });
 
 

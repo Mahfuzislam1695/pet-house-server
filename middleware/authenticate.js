@@ -2,10 +2,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 
-const authenticate = async(req, res, next) => {
+const Authenticate = async(req, res, next) => {
 try{
-    const token = req.cookies.jwtoken;
-    const verifyToken = jwt.verify(token,process.env.SECRET_KEY)
+    const token = req.cookies.access_token;
+    const verifyToken = jwt.verify(token, process.env.SECRET_KEY)
 
     const rootUser = await User.findOne({_id: verifyToken._id, "tokens.token": token});
 
@@ -23,4 +23,4 @@ next()
 }
 }
 
-module.exports = authenticate;
+module.exports = Authenticate;
